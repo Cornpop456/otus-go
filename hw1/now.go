@@ -7,7 +7,7 @@ import (
 	"github.com/beevik/ntp"
 )
 
-func main() {
+func now() string {
 	time, err := ntp.Time("0.beevik-ntp.pool.ntp.org")
 
 	if err != nil {
@@ -15,5 +15,10 @@ func main() {
 		os.Exit(1)
 	}
 
-	fmt.Printf("Current time is %s\n", time.Format("15:04:05"))
+	return fmt.Sprintf("Current time is %s\n", time.Format("15:04:05"))
+}
+
+func main() {
+	res := now()
+	fmt.Printf(res)
 }
