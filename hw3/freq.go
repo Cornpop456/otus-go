@@ -1,12 +1,9 @@
 package main
 
 import (
-	"errors"
 	"fmt"
-	"log"
 	"regexp"
 	"sort"
-	"strconv"
 	"strings"
 )
 
@@ -22,20 +19,20 @@ func (wf WordFrequency) String() string {
 
 func clearText(text string) string {
 	text = strings.ToLower(text)
-	text = strings.TrimSpace(text)
 	text = strings.ReplaceAll(text, "\n", " ")
 	text = strings.ReplaceAll(text, "\t", " ")
 
 	reg1, _ := regexp.Compile(`\s\s+`)
 	reg2, _ := regexp.Compile(`[^\wА-Яа-я\s\\/]+`)
 
-	text = reg2.ReplaceAllString(reg1.ReplaceAllString(text, " "), "")
+	text = reg1.ReplaceAllString(reg2.ReplaceAllString(text, ""), " ")
+	text = strings.TrimSpace(text)
 
 	return text
 }
 
 // GetWordsFrequency returns slice of a reverse sorted slice of WordFrequency from a given text with top arg number of elements
-func GetWordsFrequency(text string, top uint32) ([]WordFrequency, error) {
+func GetWordsFrequency(text string, top uint32) []WordFrequency {
 	var (
 		dict           map[string]int
 		frequencySlice []WordFrequency
@@ -64,26 +61,31 @@ func GetWordsFrequency(text string, top uint32) ([]WordFrequency, error) {
 	})
 
 	if top > uint32(len(frequencySlice)) {
-		return []WordFrequency{}, errors.New("Given [top] argument is bigger than words number: " + strconv.Itoa(len(frequencySlice)))
+		return frequencySlice
 	}
 
 	res := make([]WordFrequency, top)
 
 	copy(res, frequencySlice[:top])
 
-	frequencySlice = nil
+	return res
+}
 
-	return res, nil
+// Top10 return top 10 words from given text
+func Top10(text string) []string {
+	val := GetWordsFrequency(text, 10)
+
+	res := make([]string, len(val))
+
+	for i, v := range val {
+		res[i] = v.Word
+	}
+
+	return res
 }
 
 func main() {
-	res, err := GetWordsFrequency(Text, 10)
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	for _, v := range res {
+	for _, v := range Top10(Text) {
 		fmt.Println(v)
 
 	}
