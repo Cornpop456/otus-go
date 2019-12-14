@@ -6,16 +6,18 @@ import (
 	"log"
 	"regexp"
 	"sort"
+	"strconv"
 	"strings"
 )
 
-type wordFrequency struct {
-	word      string
-	frequency uint32
+// WordFrequency represents a single word frequency
+type WordFrequency struct {
+	Word      string
+	Frequency uint32
 }
 
-func (wf wordFrequency) String() string {
-	return fmt.Sprintf("{%s} was found {%d} times", wf.word, wf.frequency)
+func (wf WordFrequency) String() string {
+	return fmt.Sprintf("{%s} was found {%d} times", wf.Word, wf.Frequency)
 }
 
 func clearText(text string) string {
@@ -32,43 +34,50 @@ func clearText(text string) string {
 	return text
 }
 
-func getWordsFrequency(text string, top uint32) ([]wordFrequency, error) {
+// GetWordsFrequency returns slice of a reverse sorted slice of WordFrequency from a given text with top arg number of elements
+func GetWordsFrequency(text string, top uint32) ([]WordFrequency, error) {
 	var (
 		dict           map[string]int
-		frequencySlice []wordFrequency
+		frequencySlice []WordFrequency
 		counter        = 0
 	)
 
 	text = clearText(text)
 
-	s := strings.Split(text, " ")
+	splitedText := strings.Split(text, " ")
 
-	dict = make(map[string]int, len(s))
+	dict = make(map[string]int, len(splitedText))
 
-	for _, v := range s {
+	for _, v := range splitedText {
 		dict[v]++
 	}
 
-	frequencySlice = make([]wordFrequency, len(dict))
+	frequencySlice = make([]WordFrequency, len(dict))
 
 	for key, value := range dict {
-		frequencySlice[counter] = wordFrequency{key, uint32(value)}
+		frequencySlice[counter] = WordFrequency{key, uint32(value)}
 		counter++
 	}
 
 	sort.Slice(frequencySlice, func(i, j int) bool {
-		return frequencySlice[i].frequency > frequencySlice[j].frequency
+		return frequencySlice[i].Frequency > frequencySlice[j].Frequency
 	})
 
 	if top > uint32(len(frequencySlice)) {
-		return []wordFrequency{}, errors.New("Given [top] argument is bigger than number of words")
+		return []WordFrequency{}, errors.New("Given [top] argument is bigger than words number: " + strconv.Itoa(len(frequencySlice)))
 	}
 
-	return frequencySlice[:top], nil
+	res := make([]WordFrequency, top)
+
+	copy(res, frequencySlice[:top])
+
+	frequencySlice = nil
+
+	return res, nil
 }
 
 func main() {
-	res, err := getWordsFrequency(Text, 10)
+	res, err := GetWordsFrequency(Text, 10)
 
 	if err != nil {
 		log.Fatal(err)
