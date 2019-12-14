@@ -14,10 +14,11 @@ var testData = []struct {
 	{`a a b b b`, []string{"b", "a"}},
 	{`    -    -!!! ;;;; ....,,, ,,,!
 	
-	`, []string{""}},
-	{``, []string{""}},
+	`, []string{}},
+	{``, []string{}},
 	{` A A A a b B!!! a a C c C c C!!`, []string{"a", "c", "b"}},
-	{`---   hello HELLO, heLl"o"!!!`, []string{"hello"}},
+	{`---   hello HELLO, "heLlo"!!!`, []string{"hello"}},
+	{`приВет, привеТ:; мир!`, []string{"привет", "мир"}},
 	{`
 	a - a. a, A--'' "a" a a''' a .a. a!
 	
