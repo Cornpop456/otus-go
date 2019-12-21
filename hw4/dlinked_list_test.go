@@ -157,4 +157,8 @@ func TestRemove(t *testing.T) {
 		assert.Equal(t, tc.wantFirst, tc.l.First().Value(), "values should be equal")
 		assert.Equal(t, tc.wantLast, tc.l.Last().Value(), "values should be equal")
 	}
+
+	lst.Remove(*(lst.First())) // delete last element
+	assert.Nil(t, lst.First())
+	assert.Nil(t, lst.Last())
 }
