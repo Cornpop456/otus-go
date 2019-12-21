@@ -32,17 +32,17 @@ func (i Item) Prev() *Item {
 }
 
 // Len returns length of List
-func (l List) Len() uint32 {
+func (l *List) Len() uint32 {
 	return l.length
 }
 
 // First returns first Item of List
-func (l List) First() *Item {
+func (l *List) First() *Item {
 	return l.first
 }
 
 // Last returns last Item of List
-func (l List) Last() *Item {
+func (l *List) Last() *Item {
 	return l.last
 }
 
@@ -87,7 +87,7 @@ func (l *List) Remove(i Item) {
 }
 
 // Traverse prints elements of List from first to last
-func (l List) Traverse() {
+func (l *List) Traverse() {
 	cur := l.first
 	for cur != nil {
 		fmt.Printf("%v-> ", cur.Value())
@@ -97,7 +97,7 @@ func (l List) Traverse() {
 }
 
 // TraverseBack prints elements of List from last to first
-func (l List) TraverseBack() {
+func (l *List) TraverseBack() {
 	cur := l.last
 	for cur != nil {
 		fmt.Printf("<-%v ", cur.Value())
