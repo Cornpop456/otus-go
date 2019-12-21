@@ -72,7 +72,7 @@ func (l *List) PushBack(v interface{}) {
 	l.length++
 }
 
-// Remove removes Item from List
+// Remove deletes Item from List
 func (l *List) Remove(i Item) {
 	prev, next := i.Prev(), i.Next()
 	if prev == nil {

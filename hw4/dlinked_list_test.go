@@ -8,16 +8,15 @@ import (
 
 func TestValue(t *testing.T) {
 	tests := []struct {
-		i    Item
-		want interface{}
+		i Item
 	}{
-		{Item{}, nil},
-		{Item{value: 10}, 10},
-		{Item{value: "Hello"}, "Hello"},
-		{Item{value: []int{1, 2, 3}}, []int{1, 2, 3}},
+		{Item{}},
+		{Item{value: 10}},
+		{Item{value: "Hello"}},
+		{Item{value: []int{1, 2, 3}}},
 	}
 	for _, tc := range tests {
-		assert.Equal(t, tc.want, tc.i.Value(), "values should be equal")
+		assert.Equal(t, tc.i.value, tc.i.Value(), "values should be equal")
 	}
 }
 
@@ -39,29 +38,60 @@ func TestPrev(t *testing.T) {
 		i Item
 	}{
 		{Item{}},
-		{Item{next: &Item{value: 20}}},
-		{Item{next: &Item{value: "world"}}},
+		{Item{prev: &Item{value: 20}}},
+		{Item{prev: &Item{value: "world"}}},
 	}
 	for _, tc := range tests {
 		assert.Same(t, tc.i.prev, tc.i.Prev(), "pointers should be equal")
 	}
 }
 
-func TestLen(t *testing.T) {
+func TestPushFront(t *testing.T) {
 	lst := &List{}
 
 	tests := []struct {
-		l    *List
-		want uint32
+		l          *List
+		want       interface{}
+		wantLength uint32
 	}{
-		{lst, 0},
-		{lst, 1},
-		{lst, 2},
-		{lst, 3},
+		{lst, 10, 1},
+		{lst, 20, 2},
+		{lst, 30, 3},
+		{lst, "hello", 4},
 	}
 	for _, tc := range tests {
-		assert.Equal(t, tc.want, tc.l.Len(), "values should be equal")
-		tc.l.PushBack(1)
+		tc.l.PushFront(tc.want)
+		assert.Equal(t, tc.want, tc.l.First().Value(), "values should be equal")
+		assert.Equal(t, tc.wantLength, tc.l.length, "values should be equal")
+	}
+}
+
+func TestPushBack(t *testing.T) {
+	lst := &List{}
+
+	tests := []struct {
+		l          *List
+		want       interface{}
+		wantLength uint32
+	}{
+		{lst, 40, 1},
+		{lst, 50, 2},
+		{lst, 60, 3},
+		{lst, "world", 4},
+	}
+	for _, tc := range tests {
+		tc.l.PushBack(tc.want)
+		assert.Equal(t, tc.want, tc.l.Last().Value(), "values should be equal")
+		assert.Equal(t, tc.wantLength, tc.l.length, "values should be equal")
+	}
+}
+
+func TestLen(t *testing.T) {
+	lst := &List{}
+
+	for _, v := range []uint32{1, 2, 3, 4, 5} {
+		lst.PushBack(v)
+		assert.Equal(t, lst.length, lst.Len(), "values should be equal")
 	}
 }
 
@@ -98,42 +128,6 @@ func TestLast(t *testing.T) {
 	for _, tc := range tests {
 		tc.l.PushBack(tc.toInsert)
 		assert.Same(t, tc.l.last, tc.l.Last(), "pointers should be equal")
-	}
-}
-
-func TestPushFront(t *testing.T) {
-	lst := &List{}
-
-	tests := []struct {
-		l    *List
-		want interface{}
-	}{
-		{lst, 10},
-		{lst, 20},
-		{lst, 30},
-		{lst, "hello"},
-	}
-	for _, tc := range tests {
-		tc.l.PushFront(tc.want)
-		assert.Equal(t, tc.want, tc.l.First().Value(), "values should be equal")
-	}
-}
-
-func TestPushBack(t *testing.T) {
-	lst := &List{}
-
-	tests := []struct {
-		l    *List
-		want interface{}
-	}{
-		{lst, 40},
-		{lst, 50},
-		{lst, 60},
-		{lst, "world"},
-	}
-	for _, tc := range tests {
-		tc.l.PushBack(tc.want)
-		assert.Equal(t, tc.want, tc.l.Last().Value(), "values should be equal")
 	}
 }
 
