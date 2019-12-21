@@ -75,7 +75,12 @@ func (l *List) PushBack(v interface{}) {
 // Remove deletes Item from List
 func (l *List) Remove(i Item) {
 	prev, next := i.Prev(), i.Next()
-	if prev == nil {
+	if next == nil && prev == nil {
+		l.first = nil
+		l.last = nil
+		l.length--
+		return
+	} else if prev == nil {
 		l.first = next
 		l.first.prev = nil
 	} else if next == nil {
@@ -84,11 +89,15 @@ func (l *List) Remove(i Item) {
 	} else {
 		prev.next, next.prev = next, prev
 	}
+	l.length--
 }
 
 // Traverse prints elements of List from first to last
 func (l *List) Traverse() {
 	cur := l.first
+	if cur == nil {
+		fmt.Printf("empty list")
+	}
 	for cur != nil {
 		fmt.Printf("%v-> ", cur.Value())
 		cur = cur.Next()
@@ -99,6 +108,9 @@ func (l *List) Traverse() {
 // TraverseBack prints elements of List from last to first
 func (l *List) TraverseBack() {
 	cur := l.last
+	if cur == nil {
+		fmt.Printf("empty list")
+	}
 	for cur != nil {
 		fmt.Printf("<-%v ", cur.Value())
 		cur = cur.Prev()
