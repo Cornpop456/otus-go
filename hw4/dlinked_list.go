@@ -124,20 +124,20 @@ func (l *List) TraverseBack() {
 	}
 }
 
-func main() {
-	list := &List{}
-	list.PushBack(1)
-	list.PushBack(2)
-	list.PushBack(3)
-	list.PushBack(4)
-	list.PushBack(5)
-	list.PushBack(6)
-	list.Traverse()
-	list.TraverseBack()
-	list.Remove(*(list.First().Next().Next()))
-	list.Traverse()
-	list.TraverseBack()
-	list.Remove(*(list.Last().Prev()))
-	list.Traverse()
-	list.TraverseBack()
-}
+// func main() {
+// 	list := &List{}
+// 	list.PushBack(1)
+// 	list.PushBack(2)
+// 	list.PushBack(3)
+// 	list.PushBack(4)
+// 	list.PushBack(5)
+// 	list.PushBack(6)
+// 	list.Traverse()
+// 	list.TraverseBack()
+// 	list.Remove(*(list.First().Next().Next()))
+// 	list.Traverse()
+// 	list.TraverseBack()
+// 	list.Remove(*(list.Last().Prev()))
+// 	list.Traverse()
+// 	list.TraverseBack()
+// }
