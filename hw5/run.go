@@ -47,11 +47,11 @@ func divideTasks(tasks []task, N int) [][]task {
 	return res
 }
 
-func runPart(arr []task, maxErrors int, finish chan<- int, errors chan<- error, currentErrorsNum <-chan int, completedTasks chan<- int) {
+func runPart(arr []task, maxErrors int, finish chan<- int, errors chan<- error, ErrorsNum <-chan int, completedTasks chan<- int) {
 	errCount := 0
 	tasksCount := 0
 	for _, v := range arr {
-		errCount = <-currentErrorsNum
+		errCount = <-ErrorsNum
 		if errCount >= maxErrors {
 			completedTasks <- tasksCount
 			finish <- 0
@@ -86,13 +86,13 @@ func Run(tasks []task, N int, M int) (RunStat, error) {
 
 	finish := make(chan int, N)
 	errors := make(chan error, M)
-	currentErrorsNum := make(chan int)
+	ErrorsNum := make(chan int)
 	completedTasks := make(chan int)
 
 	arr := divideTasks(tasks, N)
 
 	for _, v := range arr {
-		go runPart(v, M, finish, errors, currentErrorsNum, completedTasks)
+		go runPart(v, M, finish, errors, ErrorsNum, completedTasks)
 	}
 
 	for finishedGoroutines < N {
@@ -104,20 +104,20 @@ func Run(tasks []task, N int, M int) (RunStat, error) {
 			errorCounter++
 		case tmpTasks := <-completedTasks:
 			totalTasks += tmpTasks
-		case currentErrorsNum <- errorCounter:
+		case ErrorsNum <- errorCounter:
 		}
 	}
 
 	close(finish)
 	close(errors)
-	close(currentErrorsNum)
+	close(ErrorsNum)
 	close(completedTasks)
 
 	return RunStat{errorCounter, successedGoroutines, totalTasks}, nil
 }
 
 func main() {
-	var task1, task2, task3, task4, task5, task6, task7, task8 func() error
+	var task1, task2, task3, task4, task5, task6, task7, task8 task
 
 	task1 = func() error {
 		fmt.Println("Task 1")
@@ -132,6 +132,7 @@ func main() {
 	}
 
 	task3 = func() error {
+		time.Sleep(1 * time.Second)
 		fmt.Println("Task 3")
 
 		return nil
@@ -145,7 +146,6 @@ func main() {
 	}
 
 	task5 = func() error {
-		time.Sleep(1 * time.Second)
 		fmt.Println("Task 5")
 
 		return nil
@@ -169,7 +169,7 @@ func main() {
 		return nil
 	}
 
-	stat, _ := Run([]task{task1, task2, task3, task4, task5, task6, task7, task8}, 3, 2)
+	stat, _ := Run([]task{task1, task2, task3, task4, task5, task6, task7, task8}, 2, 2)
 
 	fmt.Print(stat)
 }
