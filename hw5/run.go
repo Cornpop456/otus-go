@@ -19,52 +19,31 @@ func (r RunStat) String() string {
 	return fmt.Sprintf("errors:%v\ngoroutines succed:%v\ntasks were done:%v\n", r.errors, r.goroutinesSucced, r.completedTasks)
 }
 
-func divideTasks(tasks []task, N int) [][]task {
-	res := make([][]task, 0, N)
-	partSize := (len(tasks) / N) + len(tasks)%N
-
-	if len(tasks) <= N {
-		for _, v := range tasks {
-			res = append(res, []task{v})
-		}
-		return res
-	}
-
-	for i := 0; i < N; i++ {
-		part := make([]task, 0, partSize)
-		res = append(res, part)
-	}
-
-	for i := 0; i < len(tasks); i += len(res) {
-		for j := range res {
-			if i+j == len(tasks) {
-				break
-			}
-			res[j] = append(res[j], tasks[i+j])
-		}
-	}
-
-	return res
-}
-
-func runPart(arr []task, maxErrors int, finish chan<- int, errors chan<- error, ErrorsNum <-chan int, completedTasks chan<- int) {
+func runPart(tasks <-chan task, maxErrors int, finish chan<- int, errors chan<- error, ErrorsNum <-chan int, completedTasks chan<- int) {
+	var currTask task
+	var ok bool
 	errCount := 0
 	tasksCount := 0
-	for _, v := range arr {
+	for {
+		currTask, ok = <-tasks
+		if !ok {
+			completedTasks <- tasksCount
+			finish <- 1
+			return
+		}
 		errCount = <-ErrorsNum
 		if errCount >= maxErrors {
 			completedTasks <- tasksCount
 			finish <- 0
 			return
 		}
-		err := v()
+		err := currTask()
 		if err != nil {
 			errors <- err
 		}
 		tasksCount++
 	}
-	completedTasks <- tasksCount
-	finish <- 1
+
 }
 
 // Run executes tasks in N goroutines and finishes if M errors occured
@@ -86,13 +65,18 @@ func Run(tasks []task, N int, M int) (RunStat, error) {
 
 	finish := make(chan int, N)
 	errors := make(chan error, M)
+	tasksChan := make(chan task, len(tasks))
 	ErrorsNum := make(chan int)
 	completedTasks := make(chan int)
 
-	arr := divideTasks(tasks, N)
+	for i := 0; i < len(tasks); i++ {
+		tasksChan <- tasks[i]
+	}
 
-	for _, v := range arr {
-		go runPart(v, M, finish, errors, ErrorsNum, completedTasks)
+	close(tasksChan)
+
+	for i := 0; i < N; i++ {
+		go runPart(tasksChan, M, finish, errors, ErrorsNum, completedTasks)
 	}
 
 	for finishedGoroutines < N {
