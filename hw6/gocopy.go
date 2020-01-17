@@ -15,15 +15,6 @@ var toFlag string
 var offsetFlag int64
 var limitFlag int64
 
-func init() {
-	flag.StringVar(&fromFlag, "from", "", "source file")
-	flag.StringVar(&toFlag, "to", "", "dest file")
-	flag.Int64Var(&offsetFlag, "offset", 0, "offset in src file")
-	flag.Int64Var(&limitFlag, "limit", 0, "number of bytes to copy")
-
-	flag.Parse()
-}
-
 // Copy copies data from one file to another with limit and offset passed through command line args
 func Copy(from string, to string, limit int64, offset int64) error {
 	src, err := os.Open(from)
@@ -51,9 +42,9 @@ func Copy(from string, to string, limit int64, offset int64) error {
 		limit = srcSize - offset
 	}
 
-	src.Seek(offsetFlag, 0)
+	src.Seek(offset, 0)
 
-	tmpl := `{{green "Progress status:" }} {{percent . | magenta}} {{green "copied"}}`
+	tmpl := `{{green "Progress status:" }} {{percent . | magenta}} {{green "copied"}} `
 
 	bar := pb.ProgressBarTemplate(tmpl).Start64(limit)
 
@@ -68,6 +59,13 @@ func Copy(from string, to string, limit int64, offset int64) error {
 }
 
 func main() {
+	flag.StringVar(&fromFlag, "from", "", "source file")
+	flag.StringVar(&toFlag, "to", "", "dest file")
+	flag.Int64Var(&offsetFlag, "offset", 0, "offset in src file")
+	flag.Int64Var(&limitFlag, "limit", 0, "number of bytes to copy")
+
+	flag.Parse()
+
 	err := Copy(fromFlag, toFlag, limitFlag, offsetFlag)
 
 	if err != nil {
