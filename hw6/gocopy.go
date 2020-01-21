@@ -20,16 +20,20 @@ func Copy(from string, to string, limit int64, offset int64) error {
 	src, err := os.Open(from)
 	dst, err2 := os.Create(to)
 
-	defer src.Close()
-	defer dst.Close()
-
 	if err != nil {
 		return err
-	} else if err2 != nil {
+	}
+
+	defer src.Close()
+
+	if err2 != nil {
 		return err2
 	}
 
+	defer dst.Close()
+
 	fi, err := src.Stat()
+
 	if err != nil {
 		return err
 	}
@@ -37,12 +41,14 @@ func Copy(from string, to string, limit int64, offset int64) error {
 	srcSize := fi.Size()
 
 	if srcSize-offset <= 0 {
-		return fmt.Errorf("Incorrect offset: out of file size")
+		return fmt.Errorf("incorrect offset: out of file size")
 	} else if (srcSize-offset) < limit || limit == 0 {
 		limit = srcSize - offset
 	}
 
-	src.Seek(offset, 0)
+	if _, err := src.Seek(offset, 0); err != nil {
+		return err
+	}
 
 	tmpl := `{{green "Progress status:" }} {{percent . | magenta}} {{green "copied"}} `
 
