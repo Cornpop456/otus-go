@@ -11,12 +11,12 @@ import (
 
 // Calendar represents basic calendar
 type Calendar struct {
-	eventsStorage storage.MemoryStorage
+	eventsStorage storage.Storage
 	eventsNumber  int
 }
 
 // New returns new calendar
-func New(storage storage.MemoryStorage) *Calendar {
+func New(storage storage.Storage) *Calendar {
 	return &Calendar{storage, 0}
 }
 

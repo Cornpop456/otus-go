@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/Cornpop456/otus-go/calendar-app/internal/calendar"
+	"github.com/Cornpop456/otus-go/calendar-app/internal/calendar/memstorage"
 )
 
 func init() {
@@ -14,7 +15,7 @@ func init() {
 }
 
 func main() {
-	calendar := calendar.New(calendar.NewEventsLocalStorage())
+	calendar := calendar.New(memstorage.NewEventsLocalStorage())
 	t, err := time.Parse(time.RFC822, "26 Jan 20 19:00 MSK")
 	if err != nil {
 		log.Fatalln(err)
