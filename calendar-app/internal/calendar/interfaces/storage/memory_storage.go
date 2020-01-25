@@ -1,4 +1,4 @@
-package memstorage
+package storage
 
 // MemoryStorage for storing data in memory
 type MemoryStorage interface {
