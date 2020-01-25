@@ -1,6 +1,7 @@
 package calendar
 
 import (
+	"sync"
 	"time"
 
 	"github.com/Cornpop456/otus-go/calendar-app/internal/calendar/models"
@@ -9,6 +10,7 @@ import (
 // EventsLocalStorage implements Storage interface
 type EventsLocalStorage struct {
 	events []*models.Event
+	mux    sync.Mutex
 }
 
 // NewEventsLocalStorage returns EventsLocalStorage
@@ -20,6 +22,9 @@ func NewEventsLocalStorage() *EventsLocalStorage {
 
 // AddItem adds item to storage implementation
 func (s *EventsLocalStorage) AddItem(item interface{}) error {
+	s.mux.Lock()
+	defer s.mux.Unlock()
+
 	event, ok := item.(*models.Event)
 	if !ok {
 		return ErrEventNotFound
@@ -37,6 +42,9 @@ func (s *EventsLocalStorage) AddItem(item interface{}) error {
 
 // DeleteItem deletes item from storage
 func (s *EventsLocalStorage) DeleteItem(id string) error {
+	s.mux.Lock()
+	defer s.mux.Unlock()
+
 	for i, v := range s.events {
 		if id == v.ID {
 			s.events[i] = s.events[len(s.events)-1]
@@ -50,6 +58,9 @@ func (s *EventsLocalStorage) DeleteItem(id string) error {
 
 // ChangeItem changes item in storage
 func (s *EventsLocalStorage) ChangeItem(id string, args map[string]string) error {
+	s.mux.Lock()
+	defer s.mux.Unlock()
+
 	for _, v := range s.events {
 		if newDateString, ok := args["Date"]; ok {
 			rawDate, err := time.Parse(time.RFC822, newDateString)
@@ -89,6 +100,9 @@ func (s *EventsLocalStorage) ChangeItem(id string, args map[string]string) error
 
 // GetItem gets item from storage
 func (s *EventsLocalStorage) GetItem(id string) (interface{}, error) {
+	s.mux.Lock()
+	defer s.mux.Unlock()
+
 	for _, v := range s.events {
 		if id == v.ID {
 			return v, nil
@@ -99,6 +113,9 @@ func (s *EventsLocalStorage) GetItem(id string) (interface{}, error) {
 
 // GetItems gets all items from storage
 func (s *EventsLocalStorage) GetItems() []interface{} {
+	s.mux.Lock()
+	defer s.mux.Unlock()
+
 	res := make([]interface{}, 0, len(s.events))
 	for _, v := range s.events {
 		res = append(res, v)
