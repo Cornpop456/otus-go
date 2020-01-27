@@ -1,6 +1,7 @@
 package memstorage
 
 import (
+	"fmt"
 	"sync"
 	"time"
 
@@ -27,12 +28,15 @@ func (s *EventsLocalStorage) AddItem(item interface{}) error {
 
 	event, ok := item.(*models.Event)
 	if !ok {
-		return ErrEventNotFound
+		return ErrWrongType
 	}
 
 	for _, v := range s.events {
-		if event.EventDate.String() == v.EventDate.String() {
+		if event.RawDate.String() == v.RawDate.String() {
 			return ErrSameTime
+		} else if event.ID == v.ID {
+			fmt.Println("same")
+			return ErrSameID
 		}
 	}
 
@@ -62,31 +66,29 @@ func (s *EventsLocalStorage) ChangeItem(id string, args map[string]string) error
 	defer s.mux.Unlock()
 
 	for _, v := range s.events {
-		if newDateString, ok := args["Date"]; ok {
-			rawDate, err := time.Parse(time.RFC822, newDateString)
-			if err != nil {
-				return err
-			}
-
-			date := &models.Date{
-				Year:  rawDate.Format("2006"),
-				Month: rawDate.Format("Jan"),
-				Day:   rawDate.Format("Mon"),
-				Time:  rawDate.Format("15:04:05"),
-			}
-
-			for _, v := range s.events {
-				if date.String() == v.EventDate.String() {
-					return ErrSameTime
+		if id == v.ID {
+			if newDateString, ok := args["Date"]; ok {
+				rawDate, err := time.Parse(time.RFC822, newDateString)
+				if err != nil {
+					return err
 				}
 
+				date := &models.Date{
+					Year:  rawDate.Format("2006"),
+					Month: rawDate.Format("Jan"),
+					Day:   rawDate.Format("Mon"),
+					Time:  rawDate.Format("15:04:05"),
+				}
+
+				for _, val := range s.events {
+					if rawDate.String() == val.RawDate.String() {
+						return ErrSameTime
+					}
+				}
 				v.EventDate = date
 				v.RawDate = &rawDate
 			}
-		}
-		if id == v.ID {
 			if newName, ok := args["Name"]; ok {
-
 				v.Name = newName
 			}
 			if newDesc, ok := args["Description"]; ok {
