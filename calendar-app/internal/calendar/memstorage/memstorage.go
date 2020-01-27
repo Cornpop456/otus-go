@@ -1,47 +1,50 @@
 package memstorage
 
 import (
-	"fmt"
 	"sync"
 	"time"
 
+	"github.com/Cornpop456/otus-go/calendar-app/internal/calendar/errors"
 	"github.com/Cornpop456/otus-go/calendar-app/internal/calendar/models"
+	"github.com/Cornpop456/otus-go/calendar-app/internal/pkg/utils"
 )
 
 // EventsLocalStorage implements Storage interface
 type EventsLocalStorage struct {
-	events []*models.Event
+	events map[string]*models.Event
 	mux    sync.Mutex
 }
 
 // NewEventsLocalStorage returns EventsLocalStorage
 func NewEventsLocalStorage() *EventsLocalStorage {
 	return &EventsLocalStorage{
-		events: make([]*models.Event, 0, 20),
+		events: make(map[string]*models.Event),
 	}
 }
 
 // AddItem adds item to storage implementation
-func (s *EventsLocalStorage) AddItem(item interface{}) error {
+func (s *EventsLocalStorage) AddItem(event models.Event) (string, error) {
 	s.mux.Lock()
 	defer s.mux.Unlock()
 
-	event, ok := item.(*models.Event)
-	if !ok {
-		return ErrWrongType
+	uuid, err := utils.GenetateUUID()
+
+	if err != nil {
+		return "", err
 	}
 
-	for _, v := range s.events {
+	event.ID = uuid
+
+	for id, v := range s.events {
 		if event.RawDate.String() == v.RawDate.String() {
-			return ErrSameTime
-		} else if event.ID == v.ID {
-			fmt.Println("same")
-			return ErrSameID
+			return "", errors.ErrSameTime
+		} else if event.ID == id {
+			return "", errors.ErrSameID
 		}
 	}
 
-	s.events = append(s.events, event)
-	return nil
+	s.events[uuid] = &event
+	return uuid, nil
 }
 
 // DeleteItem deletes item from storage
@@ -49,15 +52,12 @@ func (s *EventsLocalStorage) DeleteItem(id string) error {
 	s.mux.Lock()
 	defer s.mux.Unlock()
 
-	for i, v := range s.events {
-		if id == v.ID {
-			s.events[i] = s.events[len(s.events)-1]
-			s.events[len(s.events)-1] = nil
-			s.events = s.events[:len(s.events)-1]
-			return nil
-		}
+	if _, ok := s.events[id]; !ok {
+		return errors.ErrEventNotFound
 	}
-	return ErrEventNotFound
+
+	delete(s.events, id)
+	return nil
 }
 
 // ChangeItem changes item in storage
@@ -65,62 +65,67 @@ func (s *EventsLocalStorage) ChangeItem(id string, args map[string]string) error
 	s.mux.Lock()
 	defer s.mux.Unlock()
 
-	for _, v := range s.events {
-		if id == v.ID {
-			if newDateString, ok := args["Date"]; ok {
-				rawDate, err := time.Parse(time.RFC822, newDateString)
-				if err != nil {
-					return err
-				}
+	event, ok := s.events[id]
 
-				date := &models.Date{
-					Year:  rawDate.Format("2006"),
-					Month: rawDate.Format("Jan"),
-					Day:   rawDate.Format("Mon"),
-					Time:  rawDate.Format("15:04:05"),
-				}
-
-				for _, val := range s.events {
-					if rawDate.String() == val.RawDate.String() {
-						return ErrSameTime
-					}
-				}
-				v.EventDate = date
-				v.RawDate = &rawDate
-			}
-			if newName, ok := args["Name"]; ok {
-				v.Name = newName
-			}
-			if newDesc, ok := args["Description"]; ok {
-				v.Description = newDesc
-			}
-			return nil
-		}
+	if !ok {
+		return errors.ErrEventNotFound
 	}
-	return ErrEventNotFound
+
+	if newDateString, ok := args["Date"]; ok {
+		rawDate, err := time.Parse(time.RFC822, newDateString)
+
+		if err != nil {
+			return err
+		}
+
+		emptyDateModel := models.Date{}
+		dateModel, err := emptyDateModel.Parse(newDateString)
+
+		if err != nil {
+			return err
+		}
+
+		for _, val := range s.events {
+			if rawDate.String() == val.RawDate.String() {
+				return errors.ErrSameTime
+			}
+		}
+
+		event.EventDate = dateModel
+		event.RawDate = rawDate
+	}
+	if newName, ok := args["Name"]; ok {
+		event.Name = newName
+	}
+	if newDesc, ok := args["Description"]; ok {
+		event.Description = newDesc
+	}
+	return nil
 }
 
 // GetItem gets item from storage
-func (s *EventsLocalStorage) GetItem(id string) (interface{}, error) {
+func (s *EventsLocalStorage) GetItem(id string) (*models.Event, error) {
 	s.mux.Lock()
 	defer s.mux.Unlock()
 
-	for _, v := range s.events {
-		if id == v.ID {
-			return v, nil
-		}
+	event, ok := s.events[id]
+
+	if !ok {
+		return nil, errors.ErrEventNotFound
 	}
-	return nil, ErrEventNotFound
+
+	return event, nil
 }
 
 // GetItems gets all items from storage
-func (s *EventsLocalStorage) GetItems() []interface{} {
+func (s *EventsLocalStorage) GetItems() []*models.Event {
 	s.mux.Lock()
 	defer s.mux.Unlock()
 
-	res := make([]interface{}, 0, len(s.events))
+	res := make([]*models.Event, 0, len(s.events))
 	for _, v := range s.events {
 		res = append(res, v)
 	}
+
 	return res
 }

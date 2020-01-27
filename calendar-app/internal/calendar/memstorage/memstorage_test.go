@@ -27,7 +27,7 @@ func TestEventsLocalStorage_AddItem(t *testing.T) {
 	setUp()
 
 	type args struct {
-		item interface{}
+		item models.Event
 	}
 	tests := []struct {
 		s            *EventsLocalStorage
@@ -35,15 +35,13 @@ func TestEventsLocalStorage_AddItem(t *testing.T) {
 		wantErr      bool
 		eventsLength int
 	}{
-		{storage, args{1}, true, 0},
-		{storage, args{&models.Event{RawDate: &t1, ID: "0"}}, false, 1},
-		{storage, args{&models.Event{RawDate: &t2, ID: "1"}}, false, 2},
-		{storage, args{&models.Event{RawDate: &t2, ID: "2"}}, true, 2},
-		{storage, args{&models.Event{RawDate: &t3, ID: "1"}}, true, 2},
+		{storage, args{models.Event{RawDate: t1}}, false, 1},
+		{storage, args{models.Event{RawDate: t2}}, false, 2},
+		{storage, args{models.Event{RawDate: t2}}, true, 2},
 	}
 
 	for _, tc := range tests {
-		err := storage.AddItem(tc.args.item)
+		_, err := storage.AddItem(tc.args.item)
 		if tc.wantErr {
 			assert.NotNil(t, err)
 		} else {
@@ -56,9 +54,9 @@ func TestEventsLocalStorage_AddItem(t *testing.T) {
 func TestEventsLocalStorage_DeleteItem(t *testing.T) {
 	setUp()
 
-	storage.AddItem(&models.Event{ID: "0", RawDate: &t1})
-	storage.AddItem(&models.Event{ID: "1", RawDate: &t2})
-	storage.AddItem(&models.Event{ID: "2", RawDate: &t3})
+	id1, _ := storage.AddItem(models.Event{RawDate: t1})
+	id2, _ := storage.AddItem(models.Event{RawDate: t2})
+	storage.AddItem(models.Event{RawDate: t3})
 
 	type args struct {
 		id string
@@ -69,10 +67,10 @@ func TestEventsLocalStorage_DeleteItem(t *testing.T) {
 		wantErr      bool
 		eventsLength int
 	}{
-		{storage, args{"0"}, false, 2},
-		{storage, args{"0"}, true, 2},
-		{storage, args{"1"}, false, 1},
-		{storage, args{"1"}, true, 1},
+		{storage, args{id1}, false, 2},
+		{storage, args{id1}, true, 2},
+		{storage, args{id2}, false, 1},
+		{storage, args{id2}, true, 1},
 	}
 	for _, tc := range tests {
 		err := storage.DeleteItem(tc.args.id)
@@ -88,8 +86,8 @@ func TestEventsLocalStorage_DeleteItem(t *testing.T) {
 func TestEventsLocalStorage_ChangeItem(t *testing.T) {
 	setUp()
 
-	storage.AddItem(&models.Event{ID: "0", RawDate: &t1})
-	storage.AddItem(&models.Event{ID: "1", RawDate: &t3})
+	id1, _ := storage.AddItem(models.Event{RawDate: t1})
+	storage.AddItem(models.Event{RawDate: t3})
 
 	type args struct {
 		id   string
@@ -103,15 +101,14 @@ func TestEventsLocalStorage_ChangeItem(t *testing.T) {
 		wantDesc       string
 		wantDateString string
 	}{
-		{storage, args{"0", map[string]string{"Name": "name1"}}, false, "name1", "", t1.String()},
-		{storage, args{"0", map[string]string{"Description": "desc1"}}, false, "name1", "desc1", t1.String()},
-		{storage, args{"0", map[string]string{"Date": t2.Format(time.RFC822)}}, false, "name1", "desc1", t2.String()},
-		{storage, args{"0", map[string]string{"Date": t3.Format(time.RFC822)}}, true, "name1", "desc1", t2.String()},
+		{storage, args{id1, map[string]string{"Name": "name1"}}, false, "name1", "", t1.String()},
+		{storage, args{id1, map[string]string{"Description": "desc1"}}, false, "name1", "desc1", t1.String()},
+		{storage, args{id1, map[string]string{"Date": t2.Format(time.RFC822)}}, false, "name1", "desc1", t2.String()},
+		{storage, args{id1, map[string]string{"Date": t3.Format(time.RFC822)}}, true, "name1", "desc1", t2.String()},
 	}
 	for _, tc := range tests {
 		err := storage.ChangeItem(tc.args.id, tc.args.args)
-		item, _ := storage.GetItem(tc.args.id)
-		event := item.(*models.Event)
+		event, _ := storage.GetItem(tc.args.id)
 
 		if tc.wantErr {
 			assert.NotNil(t, err)

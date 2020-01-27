@@ -2,58 +2,61 @@ package calendar
 
 import (
 	"fmt"
+	"sync"
 	"time"
 
 	"github.com/Cornpop456/otus-go/calendar-app/internal/calendar/interfaces/storage"
 	"github.com/Cornpop456/otus-go/calendar-app/internal/calendar/models"
-	"github.com/Cornpop456/otus-go/calendar-app/utils"
 )
 
 // Calendar represents basic calendar
 type Calendar struct {
-	eventsStorage storage.Storage
+	eventsStorage storage.EventsStorage
 	eventsNumber  int
+	mux           sync.Mutex
 }
 
 // New returns new calendar
-func New(storage storage.Storage) *Calendar {
-	return &Calendar{storage, 0}
+func New(storage storage.EventsStorage) *Calendar {
+	return &Calendar{eventsStorage: storage, eventsNumber: 0}
 }
 
 // AddEvent adds new event to calendar
-func (c *Calendar) AddEvent(name string, desc string, date time.Time) error {
-	uuid, err := utils.GenetateUUID()
+func (c *Calendar) AddEvent(name string, desc string, date time.Time) (string, error) {
+	c.mux.Lock()
+	defer c.mux.Unlock()
+
+	emptyDateModel := models.Date{}
+
+	dateModel, err := emptyDateModel.Parse(date.Format(time.RFC822))
 
 	if err != nil {
-		return err
+		return "", err
 	}
 
-	dateStruct := &models.Date{
-		Year:     date.Format("2006"),
-		Month:    date.Format("January"),
-		Day:      date.Format("Monday"),
-		Time:     date.Format("15:04"),
-		Timezone: date.Format("MST"),
-	}
-
-	event := &models.Event{
-		ID:          uuid,
+	event := models.Event{
 		Name:        name,
 		Description: desc,
-		EventDate:   dateStruct,
-		RawDate:     &date,
+		EventDate:   dateModel,
+		RawDate:     date,
 	}
 
-	if err := c.eventsStorage.AddItem(event); err != nil {
-		return err
+	uuid, err := c.eventsStorage.AddItem(event)
+
+	if err != nil {
+		return "", err
 	}
+
 	c.eventsNumber++
 	fmt.Println("New event was added to calendar")
-	return nil
+	return uuid, nil
 }
 
 // DeleteEvent deletes event from calendar
 func (c *Calendar) DeleteEvent(eventID string) error {
+	c.mux.Lock()
+	defer c.mux.Unlock()
+
 	if err := c.eventsStorage.DeleteItem(eventID); err != nil {
 		return err
 	}
@@ -72,20 +75,15 @@ func (c *Calendar) ChangeEvent(eventID string, args map[string]string) error {
 }
 
 // GetEvent gets single event
-func (c Calendar) GetEvent(eventID string) (*models.Event, error) {
+func (c *Calendar) GetEvent(eventID string) (*models.Event, error) {
 	event, err := c.eventsStorage.GetItem(eventID)
 	if err != nil {
 		return nil, err
 	}
-	return event.(*models.Event), nil
+	return event, nil
 }
 
 // GetEvents get all events
-func (c Calendar) GetEvents() []*models.Event {
-	res := make([]*models.Event, 0, c.eventsNumber)
-	for _, v := range c.eventsStorage.GetItems() {
-		event := v.(*models.Event)
-		res = append(res, event)
-	}
-	return res
+func (c *Calendar) GetEvents() []*models.Event {
+	return c.eventsStorage.GetItems()
 }
