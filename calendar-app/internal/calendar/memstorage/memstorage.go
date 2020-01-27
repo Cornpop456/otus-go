@@ -33,13 +33,15 @@ func (s *EventsLocalStorage) AddItem(event models.Event) (string, error) {
 		return "", err
 	}
 
+	if _, ok := s.events[uuid]; ok {
+		return "", errors.ErrSameID
+	}
+
 	event.ID = uuid
 
-	for id, v := range s.events {
+	for _, v := range s.events {
 		if event.RawDate.String() == v.RawDate.String() {
 			return "", errors.ErrSameTime
-		} else if event.ID == id {
-			return "", errors.ErrSameID
 		}
 	}
 
