@@ -20,13 +20,19 @@ type Date struct {
 	Timezone string
 }
 
-// Parse returns *Date from date string
-func (d *Date) Parse(dateString string) (*Date, error) {
+func (d *Date) String() string {
+	return d.Year + ":" + d.Month + ":" + d.Day + ":" + d.Time + ":" + d.Timezone
+}
+
+// ParseDateFromString returns *Date from date string
+func ParseDateFromString(dateString string) (*Date, error) {
 	date, err := time.Parse(time.RFC822, dateString)
 
 	if err != nil {
 		return nil, err
 	}
+
+	d := &Date{}
 
 	d.Year = date.Format("2006")
 	d.Month = date.Format("January")
@@ -35,8 +41,4 @@ func (d *Date) Parse(dateString string) (*Date, error) {
 	d.Timezone = date.Format("MST")
 
 	return d, nil
-}
-
-func (d *Date) String() string {
-	return d.Year + ":" + d.Month + ":" + d.Day + ":" + d.Time + ":" + d.Timezone
 }

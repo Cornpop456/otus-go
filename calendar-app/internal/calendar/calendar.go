@@ -23,12 +23,7 @@ func New(storage storage.EventsStorage) *Calendar {
 
 // AddEvent adds new event to calendar
 func (c *Calendar) AddEvent(name string, desc string, date time.Time) (string, error) {
-	c.mux.Lock()
-	defer c.mux.Unlock()
-
-	emptyDateModel := models.Date{}
-
-	dateModel, err := emptyDateModel.Parse(date.Format(time.RFC822))
+	dateModel, err := models.ParseDateFromString(date.Format(time.RFC822))
 
 	if err != nil {
 		return "", err
@@ -47,20 +42,24 @@ func (c *Calendar) AddEvent(name string, desc string, date time.Time) (string, e
 		return "", err
 	}
 
+	c.mux.Lock()
 	c.eventsNumber++
+	c.mux.Unlock()
+
 	fmt.Println("New event was added to calendar")
 	return uuid, nil
 }
 
 // DeleteEvent deletes event from calendar
 func (c *Calendar) DeleteEvent(eventID string) error {
-	c.mux.Lock()
-	defer c.mux.Unlock()
-
 	if err := c.eventsStorage.DeleteItem(eventID); err != nil {
 		return err
 	}
+
+	c.mux.Lock()
 	c.eventsNumber--
+	c.mux.Unlock()
+
 	fmt.Println("Event was deleted from calendar")
 	return nil
 }

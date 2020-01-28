@@ -80,8 +80,7 @@ func (s *EventsLocalStorage) ChangeItem(id string, args map[string]string) error
 			return err
 		}
 
-		emptyDateModel := models.Date{}
-		dateModel, err := emptyDateModel.Parse(newDateString)
+		dateModel, err := models.ParseDateFromString(newDateString)
 
 		if err != nil {
 			return err
