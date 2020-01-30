@@ -36,13 +36,13 @@ func readDir(dir string) (map[string]string, error) {
 	}
 
 	for _, file := range files {
+		if strings.Contains(file.Name(), "=") || file.IsDir() {
+			continue
+		}
+
 		content, err := ioutil.ReadFile(path.Join(dir, file.Name()))
 		if err != nil {
 			return nil, err
-		}
-
-		if strings.Contains(file.Name(), "=") {
-			return nil, fmt.Errorf("the name of file %s contains =", file.Name())
 		}
 
 		line := strings.Split(string(content), "\n")[0]
