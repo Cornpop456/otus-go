@@ -67,6 +67,8 @@ func setupLogger() {
 		logLevel = zapcore.WarnLevel
 	case "error":
 		logLevel = zapcore.ErrorLevel
+	default:
+		logLevel = zapcore.WarnLevel
 	}
 
 	encoderConfig := zap.NewProductionEncoderConfig()
@@ -113,5 +115,5 @@ func main() {
 
 	err = http.ListenAndServe(config.HTTPListen, nil)
 
-	logger.Infof("%v", err)
+	logger.Info(err)
 }
