@@ -1,1 +1,0 @@
-2020-01-31T14:13:08.565+0300	INFO	app/main.go:108	New request from (127.0.0.1:16761): [METHOD: GET | URL: /hello]

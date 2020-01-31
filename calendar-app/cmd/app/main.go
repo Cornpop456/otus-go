@@ -111,5 +111,7 @@ func main() {
 		}
 	})
 
-	http.ListenAndServe(config.HTTPListen, nil)
+	err = http.ListenAndServe(config.HTTPListen, nil)
+
+	logger.Infof("%v", err)
 }
