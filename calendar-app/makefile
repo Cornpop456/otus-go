@@ -8,6 +8,6 @@ all: test build
 build: 
 				$(GOBUILD) -o builds/$(BINARY_NAME) -v ./cmd/app
 test: 
-				$(GOTEST) -v ./internal/calendar/memstorage
+				$(GOTEST) -v ./internal/pkg/memstorage
 start: 
 				./builds/$(BINARY_NAME) --config $(CONFIG)

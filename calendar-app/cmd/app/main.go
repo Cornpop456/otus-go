@@ -3,59 +3,30 @@ package main
 import (
 	"flag"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
 	"time"
 
 	"github.com/Cornpop456/otus-go/calendar-app/internal/calendar"
-	"github.com/Cornpop456/otus-go/calendar-app/internal/calendar/memstorage"
+	"github.com/Cornpop456/otus-go/calendar-app/internal/config"
+	"github.com/Cornpop456/otus-go/calendar-app/internal/pkg/memstorage"
 
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
-	"gopkg.in/yaml.v2"
 )
-
-// Config struct for configuring app
-type Config struct {
-	HTTPListen string `yaml:"http_listen"`
-	LogFile    string `yaml:"log_file"`
-	LogLevel   string `yaml:"log_level"`
-}
 
 var (
 	configPath string
-	config     Config
-	logFile    *os.File
 	logger     *zap.SugaredLogger
 )
 
 func init() {
 	flag.StringVar(&configPath, "config", "", "path to config file")
 	flag.Parse()
-
-	yamlFile, err := ioutil.ReadFile(configPath)
-
-	if err != nil {
-		panic("Can not read config file!")
-	}
-
-	err = yaml.Unmarshal(yamlFile, &config)
-
-	if err != nil {
-		log.Fatalf("Unmarshal: %v", err)
-	}
-
-	logFile, err = os.OpenFile(config.LogFile, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
-
-	if err != nil {
-		log.Fatalf("Error opening file: %v", err)
-	}
-
 }
 
-func setupLogger() {
+func setupLogger(config *config.Config, logOut *os.File) {
 	var logLevel zapcore.Level
 
 	switch config.LogLevel {
@@ -75,16 +46,28 @@ func setupLogger() {
 	encoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
 	encoderConfig.EncodeLevel = zapcore.CapitalLevelEncoder
 
-	writerSyncer := zapcore.AddSync(logFile)
+	writerSyncer := zapcore.AddSync(logOut)
 	encoder := zapcore.NewConsoleEncoder(encoderConfig)
 	core := zapcore.NewCore(encoder, writerSyncer, logLevel)
 	logger = zap.New(core, zap.AddCaller()).Sugar()
 }
 
 func main() {
+	configStruct := &config.Config{}
+
+	if err := configStruct.FromFile(configPath); err != nil {
+		log.Fatal(err)
+	}
+
+	logFile, err := os.OpenFile(configStruct.LogFile, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+
+	if err != nil {
+		log.Fatalf("opening file error: %v", err)
+	}
+
 	defer logFile.Close()
 
-	setupLogger()
+	setupLogger(configStruct, logFile)
 
 	calendar := calendar.New(memstorage.NewEventsLocalStorage())
 
@@ -113,7 +96,7 @@ func main() {
 		}
 	})
 
-	err = http.ListenAndServe(config.HTTPListen, nil)
+	err = http.ListenAndServe(configStruct.HTTPListen, nil)
 
 	logger.Info(err)
 }

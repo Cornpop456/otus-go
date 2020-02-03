@@ -1,0 +1,2 @@
+2020-02-03T13:11:16.309+0300	INFO	app/main.go:93	New request from (127.0.0.1:38201): [METHOD: GET | URL: /hello]
+2020-02-03T13:13:25.028+0300	INFO	app/main.go:93	New request from (127.0.0.1:38223): [METHOD: GET | URL: /hello]
