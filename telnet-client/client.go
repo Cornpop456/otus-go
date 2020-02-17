@@ -31,7 +31,7 @@ OUTER:
 			break OUTER
 		default:
 			if !scanner.Scan() {
-				log.Printf("CONNECTION WITH SERVER CLOSED\n")
+				log.Printf("conn with server closed\n")
 				if !connectionClosed {
 					closeConnChan <- 0
 				}
@@ -54,7 +54,7 @@ OUTER:
 			break OUTER
 		default:
 			if !scanner.Scan() {
-				log.Printf("GOT EOF")
+				log.Printf("got eof")
 				log.Printf("closing connection with server...")
 				closeConnChan <- 1
 				break OUTER
