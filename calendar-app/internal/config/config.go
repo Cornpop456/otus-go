@@ -10,6 +10,7 @@ import (
 // Config struct for configuring app
 type Config struct {
 	HTTPListen string `yaml:"http_listen"`
+	GRPCPort   string `yaml:"grpc_port"`
 	LogFile    string `yaml:"log_file"`
 	LogLevel   string `yaml:"log_level"`
 }
@@ -27,6 +28,8 @@ func (c *Config) FromFile(path string) error {
 	if err != nil {
 		return fmt.Errorf("unmarshaling error: %v", err)
 	}
+
+	fmt.Println(c)
 
 	return nil
 }

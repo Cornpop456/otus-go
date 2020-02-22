@@ -1,0 +1,49 @@
+syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
+
+package api.protocalendar;
+
+option go_package = "protocalendar";
+
+message Event {
+  string name = 1;
+  string description = 2;
+  google.protobuf.Timestamp eventDate = 3;
+}
+
+message EventsList {
+  repeated Event events = 1;
+}
+
+message DeleteEvent {
+  string id = 1;
+}
+
+message ChangeEvent {
+  string id = 1;
+  map<string, string> args = 2;
+}
+
+message GetEvent {
+  string id = 1;
+}
+
+
+message Response {
+  string eventID = 1;
+  string message = 2;
+}
+
+service Calendar {
+    rpc addEvent (Event) returns (Response);
+    
+    rpc deleteEvent (DeleteEvent) returns (Response);
+    
+    rpc changeEvent (ChangeEvent) returns (Response);
+    
+    rpc getEvent (GetEvent) returns (Response);
+    
+    rpc getEvents (google.protobuf.Empty) returns (EventsList);
+}

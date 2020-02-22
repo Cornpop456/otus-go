@@ -11,3 +11,5 @@ test:
 				$(GOTEST) -v ./internal/pkg/memstorage
 start: 
 				./builds/$(BINARY_NAME) --config $(CONFIG)
+gen:
+				protoc api/protocalendar/calendar.proto --go_out=plugins=grpc:.

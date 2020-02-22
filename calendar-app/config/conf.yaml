@@ -1,3 +1,4 @@
 http_listen: 127.0.0.1:8080
+grpc_port: 50051
 log_file: ./log/calendar-app.log
 log_level: info
