@@ -11,6 +11,7 @@ message Event {
   string name = 1;
   string description = 2;
   google.protobuf.Timestamp eventDate = 3;
+  string id = 4;
 }
 
 message EventsList {

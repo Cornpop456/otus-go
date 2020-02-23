@@ -89,7 +89,7 @@ func (*server) GetEvent(ctx context.Context, in *pb.GetEvent) (*pb.Event, error)
 
 	protoDate, _ := ptypes.TimestampProto(event.RawDate)
 
-	return &pb.Event{Name: event.Name, Description: event.Description, EventDate: protoDate}, nil
+	return &pb.Event{Id: event.ID, Name: event.Name, Description: event.Description, EventDate: protoDate}, nil
 }
 
 func (*server) GetEvents(ctx context.Context, in *empty.Empty) (*pb.EventsList, error) {
@@ -104,7 +104,7 @@ func (*server) GetEvents(ctx context.Context, in *empty.Empty) (*pb.EventsList, 
 
 	for i, v := range events {
 		protoDate, _ := ptypes.TimestampProto(v.RawDate)
-		protoEvent := &pb.Event{Name: v.Name, Description: v.Description, EventDate: protoDate}
+		protoEvent := &pb.Event{Id: v.ID, Name: v.Name, Description: v.Description, EventDate: protoDate}
 		eventsSlice[i] = protoEvent
 	}
 
