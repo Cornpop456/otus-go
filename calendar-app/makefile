@@ -12,4 +12,4 @@ test:
 start: 
 				./builds/$(BINARY_NAME) --config $(CONFIG)
 gen:
-				protoc api/protocalendar/calendar.proto --go_out=plugins=grpc:.
+				protoc api/calendar/calendar.proto --go_out=plugins=grpc:.

@@ -29,7 +29,5 @@ func (c *Config) FromFile(path string) error {
 		return fmt.Errorf("unmarshaling error: %v", err)
 	}
 
-	fmt.Println(c)
-
 	return nil
 }

@@ -3,9 +3,9 @@ syntax = "proto3";
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/empty.proto";
 
-package api.protocalendar;
+package api.calendar;
 
-option go_package = "protocalendar";
+option go_package = "calendar";
 
 message Event {
   string name = 1;
@@ -43,7 +43,7 @@ service Calendar {
     
     rpc changeEvent (ChangeEvent) returns (Response);
     
-    rpc getEvent (GetEvent) returns (Response);
+    rpc getEvent (GetEvent) returns (Event);
     
     rpc getEvents (google.protobuf.Empty) returns (EventsList);
 }

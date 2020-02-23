@@ -46,6 +46,7 @@ func (s *EventsLocalStorage) AddItem(event models.Event) (string, error) {
 	}
 
 	s.events[uuid] = &event
+
 	return uuid, nil
 }
 
@@ -101,6 +102,7 @@ func (s *EventsLocalStorage) ChangeItem(id string, args map[string]string) error
 	if newDesc, ok := args["Description"]; ok {
 		event.Description = newDesc
 	}
+
 	return nil
 }
 
