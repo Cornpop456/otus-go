@@ -5,7 +5,7 @@ import "google/protobuf/empty.proto";
 
 package api.calendar;
 
-option go_package = "calendar";
+option go_package = "internal/pkg";
 
 message Event {
   string name = 1;
@@ -32,17 +32,27 @@ message GetEvent {
 }
 
 
-message Response {
+message CreateEventResponse {
+  string eventID = 1;
+  string message = 2;
+}
+
+message ChangeEventResponse {
+  string eventID = 1;
+  string message = 2;
+}
+
+message DeleteEventResponse {
   string eventID = 1;
   string message = 2;
 }
 
 service Calendar {
-    rpc addEvent (Event) returns (Response);
+    rpc addEvent (Event) returns (CreateEventResponse);
     
-    rpc deleteEvent (DeleteEvent) returns (Response);
+    rpc deleteEvent (DeleteEvent) returns (DeleteEventResponse);
     
-    rpc changeEvent (ChangeEvent) returns (Response);
+    rpc changeEvent (ChangeEvent) returns (ChangeEventResponse);
     
     rpc getEvent (GetEvent) returns (Event);
     

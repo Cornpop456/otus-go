@@ -5,9 +5,10 @@ import (
 	"log"
 	"os"
 
-	"github.com/Cornpop456/otus-go/calendar-app/internal/server"
-
+	"github.com/Cornpop456/otus-go/calendar-app/internal/calendar"
 	"github.com/Cornpop456/otus-go/calendar-app/internal/config"
+	"github.com/Cornpop456/otus-go/calendar-app/internal/pkg/memstorage"
+	"github.com/Cornpop456/otus-go/calendar-app/internal/server"
 
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -66,7 +67,9 @@ func main() {
 
 	setupLogger(configStruct, logFile)
 
-	if err := server.StartServer(configStruct, logger); err != nil {
-		logger.Fatalf("server err %v", err)
+	service := server.New(calendar.New(memstorage.NewEventsLocalStorage()), logger)
+
+	if err := service.StartServer(configStruct); err != nil {
+		logger.Fatalf("server error: %s", err)
 	}
 }
