@@ -3,7 +3,7 @@ package server
 import (
 	"context"
 
-	pb "github.com/Cornpop456/otus-go/calendar-app/internal/pkg"
+	pb "github.com/Cornpop456/otus-go/calendar-app/pkg"
 	"github.com/golang/protobuf/ptypes"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/peer"

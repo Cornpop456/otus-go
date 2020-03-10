@@ -5,7 +5,7 @@ import "google/protobuf/empty.proto";
 
 package api.calendar;
 
-option go_package = "internal/pkg";
+option go_package = "./pkg";
 
 message Event {
   string name = 1;

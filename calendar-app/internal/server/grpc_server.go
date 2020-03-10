@@ -6,7 +6,7 @@ import (
 
 	"github.com/Cornpop456/otus-go/calendar-app/internal/calendar"
 	"github.com/Cornpop456/otus-go/calendar-app/internal/config"
-	pb "github.com/Cornpop456/otus-go/calendar-app/internal/pkg"
+	pb "github.com/Cornpop456/otus-go/calendar-app/pkg"
 
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
